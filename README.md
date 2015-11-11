@@ -20,7 +20,7 @@
 .encurtar <url> .........................: Encurtador de URL.
 .google <pesquisa> ......................: Pesquisa resultados no GOOGLE.
 .bitcoin ................................: Cotação do BITCOIN em tempo real.
- 
+
  
                         IRC       connections: /Server irc.Priv8.jp +6667,7000
                         IRC  SSL  connections: /Server -e irc.Priv8.jp +6697
