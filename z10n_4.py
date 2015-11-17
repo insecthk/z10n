@@ -104,6 +104,7 @@ class NoSafe:
 				self.SendMsg(canal, banner + '0,1[4 PORT 0] IP:15 {}0 DNS:14 {} 0PORTA: 15[{}]4 => FECHADA '.format(str(host_ip), str(host_addr), str(port_port)))
 			self.SendMsg(canal, 'FIM >> port_host')
 		else:
+			self.SendMsg(canal, 'ELSE >> port_host')
 			sock = socket.socket()
 			sock.settimeout(2)
 
