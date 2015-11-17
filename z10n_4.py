@@ -767,7 +767,7 @@ if __name__ == '__main__':
 	canal_principal = '#python' # Canal de comando do bot
 	ajoin = []#'#nosafe', '#priv8', '#jamaica', '#inurlbrasil', '#brasil', '#protowave'] # Canais secundários, .sendall enviará mensagem para esses canais.
 	admin = ['ins3ct', 'Zirou', 'vL'] # Nicks para acessos à funções especiais do bot
-	prefix = '.' # Prefixo para uso dos comandos
+	prefix = '!' # Prefixo para uso dos comandos
 	verbose = False
 
 	simple_banner = '14,1[Priv8.jp]0 '
