@@ -89,6 +89,7 @@ class NoSafe:
 	def PortConnect(self, banner, canal, port_host, port_port):
 		
 		if port_host.find(':') != -1:
+			print port_host
 			sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
 			sock.settimeout(2)
 			try:
