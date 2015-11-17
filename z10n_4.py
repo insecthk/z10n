@@ -89,7 +89,7 @@ class NoSafe:
 	def PortConnect(self, banner, canal, port_host, port_port):
 		
 		if port_host.find(':') != -1:
-			self.SendMsg(canal, 'ENCONTRADO >> ' + port_host)
+			self.SendMsg(canal, 'ENCONTRADO >> port_host')
 			sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
 			sock.settimeout(2)
 			try:
@@ -102,8 +102,8 @@ class NoSafe:
 			except Exception, e:
 				print str(e)
 				self.SendMsg(canal, banner + '0,1[4 PORT 0] IP:15 {}0 DNS:14 {} 0PORTA: 15[{}]4 => FECHADA '.format(str(host_ip), str(host_addr), str(port_port)))
+			self.SendMsg(canal, 'FIM >> port_host')
 		else:
-			self.SendMsg(canal, 'ELSE >> ' + port_host)
 			sock = socket.socket()
 			sock.settimeout(2)
 
@@ -417,7 +417,7 @@ class NoSafe:
 
 				if command[0] == 'dns':
 					dns_host = command[1]
-					self.SendMsg(canal, banner + '0,1[4 DNS 0] Checando15 [{}] '.format(str(command[1])))
+					# self.SendMsg(canal, banner + '0,1[4 DNS 0] Checando15 [{}] '.format(str(command[1])))
 					try:
 						dns_ips	= socket.gethostbyname_ex(dns_host)
 						try:
@@ -757,11 +757,11 @@ if __name__ == '__main__':
 
 	servidor = 'irc.priv8.jp'
 	porta = 6667
-	nick = 'z10n'
+	nick = 'NOSAFE'
 	nome = 'Nosafe'
 	email = 'nosafe@priv8.jp'
 	canal_principal = '#python' # Canal de comando do bot
-	ajoin = []#'#nosafe', '#priv8', '#jamaica', '#inurlbrasil', '#brasil', '#protowave'] # Canais secundários, .sendall enviará mensagem para esses canais.
+	ajoin = ['#nosafe', '#priv8', '#inurlbrasil', '#brasil', '#protowave', '#python'] # Canais secundários, .sendall enviará mensagem para esses canais.
 	admin = ['ins3ct', 'Zirou', 'vL'] # Nicks para acessos à funções especiais do bot
 	prefix = '.' # Prefixo para uso dos comandos
 	verbose = False
