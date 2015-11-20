@@ -89,7 +89,6 @@ class NoSafe:
 	def PortConnect(self, banner, canal, port_host, port_port):
 		
 		if port_host.find(':') != -1:
-			self.SendMsg(canal, 'ENCONTRADO >> port_host')
 			sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
 			sock.settimeout(2)
 			try:
@@ -102,17 +101,16 @@ class NoSafe:
 			except Exception, e:
 				print str(e)
 				self.SendMsg(canal, banner + '0,1[4 PORT 0] IP:15 {}0 DNS:14 {} 0PORTA: 15[{}]4 => FECHADA '.format(str(host_ip), str(host_addr), str(port_port)))
-			self.SendMsg(canal, 'FIM >> port_host')
 		else:
 			sock = socket.socket()
 			sock.settimeout(2)
 
 			try:
 				result1 = sock.connect_ex((port_host, port_port))
-				# try:
-				#	result = socket.getaddrinfo(port_host, port_port, socket.AF_INET6)[0][4][0]
-				# except:
-				#	result = result1
+				try:
+					result = socket.getaddrinfo(port_host, port_port, socket.AF_INET6)[0][4][0]
+				except:
+					result = result1
 				try:
 					host_addr = socket.gethostbyaddr(port_host)[0]
 				except:
@@ -195,7 +193,9 @@ class NoSafe:
 			self.SendMsg(canal, banner + '0,1[4 SSH 0]15 {} 0LOGIN:14 {}0 SENHA:14 {}0 [14uname -a0]:4 {} 0[14id0]:4 {} '.format(str(ssh_host), str(ssh_user), str(ssh_pass), str(response_uname), str(response_id)))
 
 		except Exception, e:
-			self.SendMsg(canal, banner + '0,1[4 SSH 0]15 {} 4=>14 {} '.format(str(ssh_host), str(e)))
+			self.SendMsg(canal, banner + '0,1[4 SSH 0]15 {} 4=> Não foi possível conectar. '.format(str(ssh_host)))
+			# self.SendMsg(canal, banner + '0,1[4 SSH 0]15 {} 4=>14 {} '.format(str(ssh_host), str(e)))
+
 
 	def SSHExec(self, banner, canal, exec_host, exec_user, exec_pass, exec_cmd):
 		try:
@@ -362,89 +362,142 @@ class NoSafe:
 						except:
 							self.SendMsg(canal, 'Algo deu errado.')
 
+# IP ANTIGO:
+#				if command[0] == 'ip':
+#					try:
+#						ip_host		= command[1]
+#						self.SendMsg(canal, banner + '0,1[4 IP 0] Checando 15[{}] '.format(str(ip_host)))
+#						ip_ips = socket.gethostbyname_ex(ip_host)[2]
+#						try:
+#							ip_ipv6	= socket.getaddrinfo(ip_host, 80, socket.AF_INET6)[0][4][0]
+#							ip_ips.append(ip_ipv6)
+#						except Exception, e:
+#							print canal, '0,1[4 IP 0]4 [IPV6] {} '.format(str(e))
+#						for ip in ip_ips:
+#							try:
+#								try:
+#									ip_ip = socket.gethostbyname(ip)
+#								except Exception, e:
+#									ip_ip = ip_host
+#									print '[GETHOSTBYNAME]', e
+#								try:									
+#									ip_reverse = socket.gethostbyaddr(ip)[0]
+#								except Exception, e:
+#									ip_reverse = 'no/rdns'
+#									# print '[IPV6 ERROR]', e
+#								try:
+#									r = requests.get('http://ip-api.com/json/' + str(ip_ip))
+#									resp = r.json()
+#									
+#									ip_empresa	= resp['org']# if (len(str(resp['org'])) > 1) else '---'
+#									ip_pais		= resp['country']# if (len(str(resp['country'])) > 1) else '---'
+#									ip_cidade	= resp['city']# if (len(cidade) > 1) else '---'
+#									ip_reg_nome	= resp['regionName']# if (len(str(resp['lon'])) > 1) else '---'
+#
+#									ip_empresa = ip_empresa.encode('utf-8')
+#									ip_pais = ip_pais.encode('utf-8')
+#									ip_cidade = ip_cidade.encode('utf-8')
+#									ip_reg_nome = ip_reg_nome.encode('utf-8')
+#
+#									self.SendMsg(canal, banner + '0,1[4 IP 0]15 {} 4=> 0[14Organização0]:15 {} '.format(str(ip), str(ip_empresa)))
+#									self.SendMsg(canal, banner + '0,1[4 IP 0]15 {} 4=> 0[14Localização0]:15 {} / {} - {} '.format(str(ip), str(ip_pais), ip_cidade, str(ip_reg_nome)))
+#									self.SendMsg(canal, banner + '0,1[4 IP 0]15 {} 4=> 0[14DNS Reverso0]:15 {} '.format(str(ip), str(ip_reverse)))
+#									self.SendMsg(canal, banner + '0,1[4 IP 0]4 {} - Completed! '.format(str(ip)))
+#
+#								except Exception, e:
+#									print 'ERRO:', e
+#									# self.SendMsg(canal, banner + '0,1[4 IP 0]4 FUNC1 - {}'.format(str(e)))
+#
+#							except Exception, e:
+#								print 'ERRO:', e
+#								# self.SendMsg(canal, banner + '0,1[4 IP 0]4 FUNC2 {}'.format(str(e)))
+#
+#					except Exception, e:
+#						print 'ERRO:', e
+#						self.SendMsg(canal, banner + '0,1[4 IP 0]4 Host não encontrado.')
+# IP NOVO:
+
 				if command[0] == 'ip':
 					try:
-						ip_host		= command[1]
-						self.SendMsg(canal, banner + '0,1[4 IP 0] Checando 15[{}] '.format(str(ip_host)))
-						ip_ips = socket.gethostbyname_ex(ip_host)[2]
-						try:
-							ip_ipv6	= socket.getaddrinfo(ip_host, 80, socket.AF_INET6)[0][4][0]
-							ip_ips.append(ip_ipv6)
-						except Exception, e:
-							print canal, '0,1[4 IP 0]4 [IPV6] {} '.format(str(e))
-						for ip in ip_ips:
+						host = command[1]
+						ips = []
+						self.SendMsg(canal, banner + '0,1[4 IP 0] Checando 15[{}] '.format(host))
+						for ip in socket.getaddrinfo(host, 0):
+							if ip[4][0] not in ips:
+								ips.append(ip[4][0])
+						for hosts in ips:
 							try:
-								try:
-									ip_ip = socket.gethostbyname(ip)
-								except Exception, e:
-									ip_ip = ip_host
-									print '[GETHOSTBYNAME]', e
-								try:									
-									ip_reverse = socket.gethostbyaddr(ip)[0]
-								except Exception, e:
-									ip_reverse = 'no/rdns'
-									# print '[IPV6 ERROR]', e
-								try:
-									r = requests.get('http://ip-api.com/json/' + str(ip_ip))
-									resp = r.json()
-									
-									ip_empresa	= resp['org']# if (len(str(resp['org'])) > 1) else '---'
-									ip_pais		= resp['country']# if (len(str(resp['country'])) > 1) else '---'
-									ip_cidade	= resp['city']# if (len(cidade) > 1) else '---'
-									ip_reg_nome	= resp['regionName']# if (len(str(resp['lon'])) > 1) else '---'
+								reverse = socket.gethostbyaddr(hosts)[0]
+							except:
+								reverse = 'no/rdns'
+							r = requests.get('http://ip-api.com/json/' + str(hosts))
+							resp = r.json()
 
-									ip_empresa = ip_empresa.encode('utf-8')
-									ip_pais = ip_pais.encode('utf-8')
-									ip_cidade = ip_cidade.encode('utf-8')
-									ip_reg_nome = ip_reg_nome.encode('utf-8')
+							ip_empresa	= resp['org']
+							ip_pais		= resp['country']
+							ip_cidade	= resp['city']
+							ip_reg_nome	= resp['regionName']
 
-									self.SendMsg(canal, banner + '0,1[4 IP 0]15 {} 4=> 0[14Organização0]:15 {} '.format(str(ip), str(ip_empresa)))
-									self.SendMsg(canal, banner + '0,1[4 IP 0]15 {} 4=> 0[14Localização0]:15 {} / {} - {} '.format(str(ip), str(ip_pais), ip_cidade, str(ip_reg_nome)))
-									self.SendMsg(canal, banner + '0,1[4 IP 0]15 {} 4=> 0[14DNS Reverso0]:15 {} '.format(str(ip), str(ip_reverse)))
-									self.SendMsg(canal, banner + '0,1[4 IP 0]4 {} - Completed! '.format(str(ip)))
+							ip_empresa = ip_empresa.encode('utf-8')
+							ip_pais = ip_pais.encode('utf-8')
+							ip_cidade = ip_cidade.encode('utf-8')
+							ip_reg_nome = ip_reg_nome.encode('utf-8')
 
-								except Exception, e:
-									print 'ERRO:', e
-									# self.SendMsg(canal, banner + '0,1[4 IP 0]4 FUNC1 - {}'.format(str(e)))
-
-							except Exception, e:
-								print 'ERRO:', e
-								# self.SendMsg(canal, banner + '0,1[4 IP 0]4 FUNC2 {}'.format(str(e)))
-
+							self.SendMsg(canal, banner + '0,1[4 IP 0]15 {} 4=> 0[14Organização0]:15 {} '.format(hosts, str(ip_empresa)))
+							self.SendMsg(canal, banner + '0,1[4 IP 0]15 {} 4=> 0[14Localização0]:15 {} / {} - {} '.format(hosts, str(ip_pais), ip_cidade, str(ip_reg_nome)))
+							self.SendMsg(canal, banner + '0,1[4 IP 0]15 {} 4=> 0[14DNS Reverso0]:15 {} '.format(hosts, reverse))
+							self.SendMsg(canal, banner + '0,1[4 IP 0]4 {} - Completed! '.format(hosts))
 					except Exception, e:
-						print 'ERRO:', e
-						self.SendMsg(canal, banner + '0,1[4 IP 0]4 Host não encontrado.')
+						self.SendMsg(canal, banner + '0,1[4 IP 0]4 Endereço não encontrado. ')
 
+# DNS ANTIGO:
+#				if command[0] == 'dns':
+#					dns_host = command[1]
+#					# self.SendMsg(canal, banner + '0,1[4 DNS 0] Checando15 [{}] '.format(str(command[1])))
+#					try:
+#						dns_ips	= socket.gethostbyname_ex(dns_host)
+#						try:
+#							dns_reverse = socket.gethostbyaddr(dns_host)
+#							dns_ipv6	= socket.getaddrinfo(dns_host, 80, socket.AF_INET6)[0][4][0]
+#						except Exception, e:
+#							print 'ERRO:', e
+#							pass
+#						for ip in dns_ips[2]:
+#							try:
+#								dns_local_reverse = socket.gethostbyaddr(ip)[0]
+#							except Exception, e:
+#								print 'ERRO:', e
+#								dns_local_reverse = 'no/rdns'
+#							self.SendMsg(canal, banner + '0,1[4 DNS 0]15 {} 4=>14 {} 4({}) '.format(str(dns_host), str(ip), str(dns_local_reverse)))
+#						try:
+#							try:
+#								dns_ipv6_reverse = socket.gethostbyaddr(dns_ipv6)[0]
+#							except Exception, e:
+#								print 'ERRO:', e
+#								dns_local_reverse = 'no/rdns'
+#							self.SendMsg(canal, banner + '0,1[4 DNS 0]15 {} 4=>14 {} 4({}) '.format(str(dns_host), str(dns_ipv6), str(dns_ipv6_reverse)))
+#						except Exception, e:
+#							print 'ERRO:', e
+#							pass
+#					except Exception, e:
+#						print 'ERRO:', e
+# DNS NOVO:
 				if command[0] == 'dns':
-					dns_host = command[1]
-					# self.SendMsg(canal, banner + '0,1[4 DNS 0] Checando15 [{}] '.format(str(command[1])))
 					try:
-						dns_ips	= socket.gethostbyname_ex(dns_host)
-						try:
-							dns_reverse = socket.gethostbyaddr(dns_host)
-							dns_ipv6	= socket.getaddrinfo(dns_host, 80, socket.AF_INET6)[0][4][0]
-						except Exception, e:
-							print 'ERRO:', e
-							pass
-						for ip in dns_ips[2]:
+						host = command[1]
+						dnss = []
+						self.SendMsg(canal, banner + '0,1[4 DNS 0] Checando 15[{}] '.format(host))
+						for dns in socket.getaddrinfo(host, 0):
+							if dns[4][0] not in dnss:
+								dnss.append(dns[4][0])
+						for hosts in dnss:
 							try:
-								dns_local_reverse = socket.gethostbyaddr(ip)[0]
-							except Exception, e:
-								print 'ERRO:', e
-								dns_local_reverse = 'no/rdns'
-							self.SendMsg(canal, banner + '0,1[4 DNS 0]15 {} 4=>14 {} 4({}) '.format(str(dns_host), str(ip), str(dns_local_reverse)))
-						try:
-							try:
-								dns_ipv6_reverse = socket.gethostbyaddr(dns_ipv6)[0]
-							except Exception, e:
-								print 'ERRO:', e
-								dns_local_reverse = 'no/rdns'
-							self.SendMsg(canal, banner + '0,1[4 DNS 0]15 {} 4=>14 {} 4({}) '.format(str(dns_host), str(dns_ipv6), str(dns_ipv6_reverse)))
-						except Exception, e:
-							print 'ERRO:', e
-							pass
-					except Exception, e:
-						print 'ERRO:', e
+								reverse = socket.gethostbyaddr(hosts)[0]
+							except:
+								reverse = 'no/rdns'
+							self.SendMsg(canal, banner + '0,1[4 DNS 0]15 {} 4=>14 {} 4({}) '.format(host, hosts, reverse))
+					except:
+						self.SendMsg(canal, banner + '0,1[4 DNS 0]4 Endereço não encontrado. ')
 				
 				if command[0] == 'port':
 					try:
@@ -757,13 +810,13 @@ if __name__ == '__main__':
 
 	servidor = 'irc.priv8.jp'
 	porta = 6667
-	nick = 'NOSAFE'
+	nick = 'z10n'
 	nome = 'Nosafe'
 	email = 'nosafe@priv8.jp'
 	canal_principal = '#python' # Canal de comando do bot
-	ajoin = ['#nosafe', '#priv8', '#inurlbrasil', '#brasil', '#protowave', '#python'] # Canais secundários, .sendall enviará mensagem para esses canais.
+	ajoin = []#'#nosafe', '#priv8', '#inurlbrasil', '#brasil', '#protowave'] # Canais secundários, .sendall enviará mensagem para esses canais.
 	admin = ['ins3ct', 'Zirou', 'vL'] # Nicks para acessos à funções especiais do bot
-	prefix = '.' # Prefixo para uso dos comandos
+	prefix = '!' # Prefixo para uso dos comandos
 	verbose = False
 
 	simple_banner = '14,1[Priv8.jp]0 '
